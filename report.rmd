@@ -1,0 +1,102 @@
+---
+title: "report.pdf"
+output: pdf_document
+date: "2025-10-27"
+---
+## Investigating Clean Energy Usage and Overall Energy Prices
+
+### Part 1: Introduction
+This report will be taking a look at if states with higher renewable usage have lower average electricity prices? In recent times many countries around the world have been making efforts to turn to more renewable and environmentally conscious sources of energy. A majority of these nations though have been wealthy ones, often with unlimited resources and funds to be able to afford these switches logistically as well as for the people living there to afford them. This report takes a closer look specifically into the energy distribution and prices among US states (which between one another vary greatly on income, GSP, and other socioeconomic factors) to see just how economically feasible transitioning to clean energy is. 
+
+
+
+
+#Part 2: Data and Methods:
+Since I was just looking at renewable energy as a share of the total compared the the averge energy price these are the datasets I used as well as how I manipulated them:
+- renew_use_2021.csv, renew_use_2022.csv, renew_use_2023.csv: Renewable energy use by state and year.
+- total_energy_use_2021.csv, total_energy_use_2022.csv, total_energy_use_2023.csv`: Total energy use by state and year.
+- av_energy_price_2021-2023.csv: Average energy price by state and year.
+
+utilizing:
+
+library(tidyverse)
+library(janitor)
+library(ggplot2)
+library(maps)
+
+I was able to mutate and join, and make longer/and shorter both of the sets of renewable and total energy use to be able to calculate what percentage of total energy use was renewable which ultimately helped me in comparing this to the average price of energy.
+
+I joined them using:
+#join both the tables togethere: 
+energy_all <- left_join(
+  renew_state, total_state,
+  by = c("state", "year")
+) |>
+  mutate(
+    renew_share = (total_renew / total_energy) * 100
+  )
+
+combined <- left_join(
+  energy_all, price,
+  by = c("state", "year")
+)
+
+#Part 3 Map Visulaization:
+
+
+State Map"
+# State map of renewable energy sources in a given year --> used 2023 here 
+
+states_map<- map_data("state")
+combined<- combined|>
+  mutate(state = tolower(state))
+map_data_2023 <- combined|>
+  filter(year == 2023)
+map_renew<- left_join (states_map,map_data_2023, by= c("region" = "state"))
+
+
+ggplot(map_renew, aes(long, lat, group= group, fill = renew_share))+
+  geom_polygon(color = "orange3") + 
+  coord_fixed(1.3)+scale_fill_viridis_c(option = "plasma") +
+  labs(title = "Renewable Energy Share by State (2023)",
+       fill = "Renewable %")
+  
+  
+Scatter Plot Comparison:
+#scatterplot comparison
+
+ggplot(combined |>
+         filter(year == 2023),
+       aes(x= renew_share, y= avg_price_cents_kwh))+
+  geom_point(color = "blue4")+
+  labs(Title= "Renwable Share vs Avg Electricity Prices (2023)",
+       x= "Renewable Energy Share (%)",
+       y = "Average Electricity Price (cents/kWh)")
+       
+       
+#Interpretation:
+Based on my plots, states with higher percentages of renewable energy use  tend to have slightly lower electricity prices than states where renewable energy had a lower % share of energy. I also saw that states that are in the West and Northeast of the US have higher shares of renewable energy than those in Southern states. Based on this analysis I think a key to increasing renewable energy shares is overcoming that initial large price tag of making the switch to renewable, in that includes new facilities, distribution, training of professionals to upkeep and maintain, but as seen in my figures overtime the price being paid for energy will be lower in places with higher shares of renewable energy than places where it's less. In regards to clean sources of electricity I think the data previously seen on EV vehicle ownership lines up pretty well with the states who also have the highest elan energy usage so its safe to say that a good portion of the energy being made to charge EVs comes from clean sources, especially in those states with higher share or renewable energy. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
